@@ -1,0 +1,20 @@
+group 'co.zsmb'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.1.51'
+    ext.webDir = "${rootDir}/web"
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    buildscript {
+        repositories {
+            mavenCentral()
+            jcenter()
+        }
+    }
+}
