@@ -1,7 +1,9 @@
 package co.zsmb.kagutodos.backend.verticles
 
+import co.zsmb.kagutodos.backend.util.jsonStr
 import co.zsmb.kagutodos.backend.models.Todo
 import co.zsmb.kagutodos.backend.util.parseJson
+import co.zsmb.kagutodos.backend.util.toJson
 import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.ADD_NEW_TODO
 import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.GET_ALL_TODOS
 import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.GET_TODO_BY_ID
@@ -39,27 +41,22 @@ class WebVerticle : AbstractVerticle() {
             }
 
             get("/todos/:id").handler { req ->
-                vertx.eventBus().send<String>(GET_TODO_BY_ID, req.pathParam("id")) { res ->
+                val message = jsonStr { "_id" to req.pathParam("id") }
+                vertx.eventBus().send<String>(GET_TODO_BY_ID, message) { res ->
                     respondWithJson(res, req)
                 }
             }
             put("/todos/:id").handler { req ->
-                val id = req.pathParam("id").toLongOrNull()
-                val todo = req.bodyAsString.parseJson<Todo>()
+                val pathParamId = req.pathParam("id")
+                val todo = req.bodyAsString.parseJson<Todo>().copy(_id = pathParamId)
 
-                if (todo.id != id) {
-                    req.response()
-                            .setStatusCode(400)
-                            .end("ID mismatch")
-                    return@handler
-                }
-
-                vertx.eventBus().send<String>(UPDATE_TODO_BY_ID, req.bodyAsString) { res ->
+                vertx.eventBus().send<String>(UPDATE_TODO_BY_ID, todo.toJson()) { res ->
                     respondWithJson(res, req)
                 }
             }
             delete("/todos/:id").handler { req ->
-                vertx.eventBus().send<String>(REMOVE_TODO_BY_ID, req.pathParam("id")) { res ->
+                val message = jsonStr { "_id" to req.pathParam("id") }
+                vertx.eventBus().send<String>(REMOVE_TODO_BY_ID, message) { res ->
                     respondWithJson(res, req)
                 }
             }

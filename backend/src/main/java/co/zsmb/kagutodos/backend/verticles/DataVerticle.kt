@@ -1,9 +1,12 @@
 package co.zsmb.kagutodos.backend.verticles
 
 import co.zsmb.kagutodos.backend.models.Todo
-import co.zsmb.kagutodos.backend.util.parseJson
-import co.zsmb.kagutodos.backend.util.toJson
+import co.zsmb.kagutodos.backend.util.*
+import com.google.gson.JsonSyntaxException
 import io.vertx.core.AbstractVerticle
+import io.vertx.core.eventbus.Message
+import io.vertx.core.json.JsonObject
+import io.vertx.ext.mongo.MongoClient
 
 class DataVerticle : AbstractVerticle() {
 
@@ -13,67 +16,104 @@ class DataVerticle : AbstractVerticle() {
         const val GET_TODO_BY_ID = "dataverticle.todo.get"
         const val UPDATE_TODO_BY_ID = "dataverticle.todo.update"
         const val REMOVE_TODO_BY_ID = "dataverticle.todo.delete"
+
+        private const val DB_NAME = "todos"
     }
 
-    private val todos = mutableListOf<Todo>(
-            Todo("My first todo", false, 1L),
-            Todo("Another todo", true, 2L)
-    )
+    lateinit var mongoClient: MongoClient
 
     override fun start() {
-        vertx.eventBus().consumer<String>(GET_ALL_TODOS) { msg ->
-            msg.reply(todos.toJson())
+
+        mongoClient = MongoClient.createShared(vertx,
+                json {
+                    "connection_string" to "mongodb://localhost:27017"
+                    "db_name" to "data_verticle_db"
+                }
+        )
+
+        subscribe(GET_ALL_TODOS) { msg ->
+            mongoClient.find(DB_NAME, json {}) { res ->
+                if (res.succeeded()) {
+                    val todos = res.result().map { it.encode().parseJson<Todo>() }
+                    msg.reply(todos.toJson())
+                } else {
+                    msg.fail("MongoDB error")
+                    res.cause().printStackTrace()
+                }
+            }
         }
 
-        vertx.eventBus().consumer<String>(ADD_NEW_TODO) { msg ->
+        subscribe(ADD_NEW_TODO) { msg ->
+            val todo = try {
+                msg.parseJson<Todo>()
+            } catch (e: JsonSyntaxException) {
+                msg.fail("Invalid Todo", 400)
+                return@subscribe
+            }
+
+            mongoClient.insert(DB_NAME, JsonObject(todo.toJson())) { res ->
+                if (res.succeeded()) {
+                    val insertedId = res.result()
+                    msg.reply(todo.copy(_id = insertedId).toJson())
+                } else {
+                    msg.fail("MongoDB error")
+                    res.cause().printStackTrace()
+                }
+            }
+        }
+
+        subscribe(GET_TODO_BY_ID) { msg ->
+            val _id = JsonObject(msg.body()).getString("_id")
+
+            mongoClient.findOne(DB_NAME, json { "_id" to _id }, json {}) { res ->
+                if (res.succeeded()) {
+                    val todo = res.result().encode().parseJson<Todo>()
+                    msg.reply(todo.toJson())
+                } else {
+                    msg.fail("MongoDB error")
+                    res.cause().printStackTrace()
+                }
+            }
+        }
+
+        subscribe(UPDATE_TODO_BY_ID) { msg ->
             val todo = msg.body().parseJson<Todo>()
 
-            val maxId = todos
-                    .map { it.id }
-                    .filterNotNull()
-                    .max()
-                    ?: 1
-            val todoWithId = todo.copy(id = maxId + 1)
-
-            todos += todoWithId
-
-            msg.reply(todoWithId.toJson())
+            mongoClient.findOneAndReplace(DB_NAME, json { "_id" to todo._id }, todo.toJsonObject()) { res ->
+                if (res.succeeded()) {
+                    // val oldTodo = res.result()
+                    msg.reply(todo.toJson())
+                } else {
+                    msg.fail("MongoDB error")
+                    res.cause().printStackTrace()
+                }
+            }
         }
 
-        vertx.eventBus().consumer<String>(GET_TODO_BY_ID) { msg ->
-            val id = msg.body().toLongOrNull()
-                    ?: return@consumer msg.fail(400, "Invalid ID")
+        subscribe(REMOVE_TODO_BY_ID) { msg ->
+            val _id = JsonObject(msg.body()).getString("_id")
 
-            val todo = todos.find { it.id == id }
-                    ?: return@consumer msg.fail(404, "No todo found by given ID")
-
-            msg.reply(todo.toJson())
+            mongoClient.findOneAndDelete(DB_NAME, json { "_id" to _id }) { res ->
+                if (res.succeeded()) {
+                    val deletedTodo = res.result()
+                    msg.reply(deletedTodo.encode())
+                } else {
+                    msg.fail("MongoDB error")
+                    res.cause().printStackTrace()
+                }
+            }
         }
+    }
 
-        vertx.eventBus().consumer<String>(UPDATE_TODO_BY_ID) { msg ->
-            val newTodo = msg.body().parseJson<Todo>()
+    fun subscribe(address: String, handler: (Message<String>) -> Unit)
+            = vertx.eventBus().consumer<String>(address, handler)
 
-            val oldTodo = todos.find { it.id == newTodo.id }
-                    ?: return@consumer msg.fail(404, "No todo found by given ID")
+    private fun Message<String>.fail(errorMessage: String = "Unknown error", code: Int = 500)
+            = fail(code, jsonStr { "error" to errorMessage })
 
-            todos -= oldTodo
-            todos += newTodo
-
-            msg.reply(newTodo.toJson())
-        }
-
-        vertx.eventBus().consumer<String>(REMOVE_TODO_BY_ID) { msg ->
-            val id = msg.body().toLongOrNull()
-                    ?: return@consumer msg.fail(400, "Invalid ID")
-
-            val todo = todos.find { it.id == id }
-                    ?: return@consumer msg.fail(404, "No todo found by given ID")
-
-            todos -= todo
-
-            msg.reply(todo.toJson())
-        }
-
+    override fun stop() {
+        mongoClient.close()
+        super.stop()
     }
 
 }
