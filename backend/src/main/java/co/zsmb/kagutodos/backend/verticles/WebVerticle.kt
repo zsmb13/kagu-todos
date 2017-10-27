@@ -1,7 +1,7 @@
 package co.zsmb.kagutodos.backend.verticles
 
-import co.zsmb.kagutodos.backend.util.jsonStr
 import co.zsmb.kagutodos.backend.models.Todo
+import co.zsmb.kagutodos.backend.util.jsonStr
 import co.zsmb.kagutodos.backend.util.parseJson
 import co.zsmb.kagutodos.backend.util.toJson
 import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.ADD_NEW_TODO
@@ -14,15 +14,23 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.eventbus.Message
 import io.vertx.core.eventbus.ReplyException
+import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.handler.CorsHandler
 
 class WebVerticle : AbstractVerticle() {
 
     override fun start(startFuture: Future<Void>) {
         val router = Router.router(vertx).apply {
+            route().handler(CorsHandler.create("*")
+                    .allowedMethod(HttpMethod.GET)
+                    .allowedMethod(HttpMethod.POST)
+                    .allowedMethod(HttpMethod.PUT)
+                    .allowedMethod(HttpMethod.DELETE)
+            )
             route().handler(BodyHandler.create())
 
             get("/").handler { req ->
