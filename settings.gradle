@@ -1,4 +1,3 @@
 rootProject.name = 'kagu-todos'
-include 'webapp'
 include 'backend'
-
+include 'frontend'

@@ -1,3 +1,6 @@
+group 'co.zsmb'
+version '1.0-SNAPSHOT'
+
 buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -8,4 +11,11 @@ apply plugin: 'kotlin2js'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
+
+    compile "co.zsmb:koinjs:0.1.2"
+    compile "co.zsmb:weblib:0.0.1"
 }
+
+ext.rootPackage = "co.zsmb.kagutodos.frontend"
+
+apply from: "helper.gradle"

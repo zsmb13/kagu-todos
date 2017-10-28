@@ -4,3 +4,4 @@
 .vertx
 local.properties
 gradle.properties
+web/
