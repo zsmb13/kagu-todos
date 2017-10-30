@@ -7,15 +7,15 @@ if "%ERRORLEVEL%"=="0" (
     start cmd /k "mongod.exe"
 )
 
-tasklist /FI "windowtitle eq KaguTodoBackend - java  -jar ../backend/build/libs/backend-fat.jar" 2>NUL | find /I /N "cmd.exe">NUL
+tasklist /FI "windowtitle eq KaguTodoBackend - java  -jar ./backend/build/libs/backend-fat.jar" 2>NUL | find /I /N "cmd.exe">NUL
 if "%ERRORLEVEL%"=="0" (
     echo "Killing backend"
-    taskkill /fi "windowtitle eq KaguTodoBackend - java  -jar ../backend/build/libs/backend-fat.jar"
+    taskkill /fi "windowtitle eq KaguTodoBackend - java  -jar ./backend/build/libs/backend-fat.jar"
     echo "Restarting backend"
-    start "KaguTodoBackend" cmd /k "java -jar ../backend/build/libs/backend-fat.jar"
+    start "KaguTodoBackend" cmd /k "java -jar ./backend/build/libs/backend-fat.jar"
 ) else (
     echo "Starting backend"
-    start "KaguTodoBackend" cmd /k "java -jar ../backend/build/libs/backend-fat.jar"
+    start "KaguTodoBackend" cmd /k "java -jar ./backend/build/libs/backend-fat.jar"
 )
 
 echo "Opening frontend"
