@@ -20,8 +20,8 @@ class TodoAPIImpl(private val httpService: HttpService) : TodoAPI {
         }
     }
 
-    override fun getTodo(id: Long, callback: (Todo) -> Unit) {
-        httpService.get("$BASE_URL/todo/$id") { result ->
+    override fun getTodo(id: String, callback: (Todo) -> Unit) {
+        httpService.get("$BASE_URL/todos/$id") { result ->
             logger.d(this, result)
             callback(JSON.parse(result))
         }
@@ -34,14 +34,14 @@ class TodoAPIImpl(private val httpService: HttpService) : TodoAPI {
         }
     }
 
-    override fun removeTodo(id: Long, callback: (Todo) -> Unit) {
+    override fun removeTodo(id: String, callback: (Todo) -> Unit) {
         httpService.delete("$BASE_URL/todos/$id") { result ->
             logger.d(this, result)
             callback(JSON.parse(result))
         }
     }
 
-    override fun updateTodo(id: Long, todo: Todo, callback: (Todo) -> Unit) {
+    override fun updateTodo(id: String, todo: Todo, callback: (Todo) -> Unit) {
         httpService.put("$BASE_URL/todos/$id", todo) { result ->
             logger.d(this, result)
             callback(JSON.parse(result))

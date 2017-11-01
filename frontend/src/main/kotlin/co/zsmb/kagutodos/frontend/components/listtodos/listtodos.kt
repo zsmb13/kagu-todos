@@ -8,9 +8,10 @@ import co.zsmb.weblib.core.di.inject
 import co.zsmb.weblib.core.util.lookup
 import co.zsmb.weblib.core.util.onClick
 import co.zsmb.weblib.services.logging.Logger
+import co.zsmb.weblib.services.navigation.Navigator
 import co.zsmb.weblib.services.templates.TemplateLoader
 import org.w3c.dom.HTMLButtonElement
-import org.w3c.dom.HTMLUListElement
+import org.w3c.dom.HTMLElement
 
 object ListTodosComponent : Component(
         selector = "list-todos",
@@ -23,15 +24,17 @@ class ListTodosController : Controller() {
     private val logger by inject<Logger>()
     private val todoAPI by inject<TodoAPI>()
     private val templateLoader by inject<TemplateLoader>()
+    private val navigator by inject<Navigator>()
 
     private val refreshBtn by lookup<HTMLButtonElement>("refreshBtn")
-    private val todoList by lookup<HTMLUListElement>("todoList")
+    private val todoList by lookup<HTMLElement>("todoList")
 
     override fun onCreate() {
         super.onCreate()
 
         refreshBtn.onClick {
             refreshTodos()
+            refreshBtn.blur()
         }
     }
 
@@ -44,9 +47,13 @@ class ListTodosController : Controller() {
     private fun refreshTodos() {
         todoAPI.getTodos { todos ->
             todoList.removeChildren()
-            todos.forEach {
+            todos.forEach { todo ->
                 templateLoader.get("components/listtodos/listitem.html") { listItem ->
-                    listItem.textContent = it.text
+                    listItem.textContent = todo.text
+                    listItem.onClick {
+                        it.preventDefault()
+                        navigator.goto("/view/${todo._id}")
+                    }
                     todoList.appendChild(listItem)
                 }
             }
