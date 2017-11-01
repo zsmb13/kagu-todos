@@ -5,14 +5,12 @@ import co.zsmb.kagutodos.frontend.util.removeChildren
 import co.zsmb.weblib.core.Component
 import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
-import co.zsmb.weblib.core.jquery.JQ
 import co.zsmb.weblib.core.util.lookup
 import co.zsmb.weblib.core.util.onClick
 import co.zsmb.weblib.services.logging.Logger
-import org.w3c.dom.Element
+import co.zsmb.weblib.services.templates.TemplateLoader
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLUListElement
-import kotlin.dom.addClass
 
 object ListTodosComponent : Component(
         selector = "list-todos",
@@ -22,22 +20,32 @@ object ListTodosComponent : Component(
 
 class ListTodosController : Controller() {
 
-    val logger by inject<Logger>()
-    val todoAPI by inject<TodoAPI>()
+    private val logger by inject<Logger>()
+    private val todoAPI by inject<TodoAPI>()
+    private val templateLoader by inject<TemplateLoader>()
 
-    val btn1 by lookup<HTMLButtonElement>("btn1")
-    val todoList by lookup<HTMLUListElement>("todos")
+    private val refreshBtn by lookup<HTMLButtonElement>("refreshBtn")
+    private val todoList by lookup<HTMLUListElement>("todoList")
 
     override fun onCreate() {
         super.onCreate()
-        logger.d(this, "onCreate")
 
-        btn1.onClick {
-            todoAPI.getTodos { todos ->
-                todoList.removeChildren()
-                todos.forEach {
-                    val listItem = JQ.parseHTML("<li></li>")[0] as Element
-                    listItem.addClass("list-group-item info")
+        refreshBtn.onClick {
+            refreshTodos()
+        }
+    }
+
+    override fun onAdded() {
+        super.onAdded()
+        logger.d(this, "onAdded, refreshing todos")
+        refreshTodos()
+    }
+
+    private fun refreshTodos() {
+        todoAPI.getTodos { todos ->
+            todoList.removeChildren()
+            todos.forEach {
+                templateLoader.get("components/listtodos/listitem.html") { listItem ->
                     listItem.textContent = it.text
                     todoList.appendChild(listItem)
                 }
