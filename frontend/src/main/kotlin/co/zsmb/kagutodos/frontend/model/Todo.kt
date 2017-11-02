@@ -1,5 +1,8 @@
 package co.zsmb.kagutodos.frontend.model
 
-data class Todo(val text: String, val completed: Boolean, val _id: String? = null)
+data class Todo(val text: String,
+                val description: String?,
+                val completed: Boolean,
+                val _id: String? = null)
 
-fun Todo.fixMethods(): Todo = Todo(text, completed, _id)
+fun Todo.fixMethods(): Todo = Todo(text, description, completed, _id)

@@ -1,3 +1,25 @@
 <div>
-    <button data-kt-id="addbtn">add todo</button>
+    <h2 class="my-3">
+        Add todo
+    </h2>
+    <div class="form-group">
+        <label for="todoText">Title</label>
+        <input type="text" class="form-control" placeholder="Enter a title" id="todoText" data-kt-id="todoText"
+               required>
+        <div class="invalid-feedback invisible" data-kt-id="titleError">
+            Please enter a title.
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="todoDescription">Description</label>
+        <textarea class="form-control" placeholder="Enter a detailed description for the task" id="todoDescription"
+                  data-kt-id="todoDescription" rows="3"></textarea>
+    </div>
+    <div class="form-check">
+        <label class="form-check-label">
+            <input type="checkbox" class="form-check-input" data-kt-id="completedCheckbox">
+            Mark as completed
+        </label>
+    </div>
+    <button class="btn btn-primary" data-kt-id="addButton">Create todo</button>
 </div>

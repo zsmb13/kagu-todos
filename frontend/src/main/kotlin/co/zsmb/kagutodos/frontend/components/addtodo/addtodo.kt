@@ -5,11 +5,11 @@ import co.zsmb.kagutodos.frontend.services.network.TodoAPI
 import co.zsmb.weblib.core.Component
 import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
-import co.zsmb.weblib.core.util.Date
 import co.zsmb.weblib.core.util.lookup
 import co.zsmb.weblib.core.util.onClick
 import co.zsmb.weblib.services.logging.Logger
-import org.w3c.dom.HTMLButtonElement
+import co.zsmb.weblib.services.navigation.Navigator
+import org.w3c.dom.*
 
 object AddTodoComponent : Component(
         selector = "add-todo",
@@ -21,18 +21,59 @@ class AddTodoController : Controller() {
 
     val logger by inject<Logger>()
     val todoAPI by inject<TodoAPI>()
+    val navigator by inject<Navigator>()
 
-    val btn by lookup<HTMLButtonElement>("addbtn")
+    val todoText by lookup<HTMLInputElement>("todoText")
+    val titleError by lookup<HTMLDivElement>("titleError")
+    val todoDescription by lookup<HTMLTextAreaElement>("todoDescription")
+    val completedCheckbox by lookup<HTMLInputElement>("completedCheckbox")
+
+    val addButton by lookup<HTMLButtonElement>("addButton")
 
     override fun onCreate() {
         super.onCreate()
 
-        btn.onClick {
-            val newTodo = Todo("new todo ${Date().getTime()}", false)
+        addButton.onClick {
+            logger.d(this, "button clicked!")
+
+            val newTodo = createTodo() ?: return@onClick
             todoAPI.addTodo(newTodo) { todo ->
                 logger.d(this, "todo back from server ${todo.text}")
+                navigator.goto("/view/${todo._id}")
             }
         }
+    }
+
+    private fun createTodo(): Todo? {
+        val title = todoText.value
+        val description = todoDescription.value
+        val completed = completedCheckbox.checked
+
+        if (title.isBlank()) {
+            logger.d(this, "title invalid")
+
+            titleError.show()
+            todoText.classList.add("is-invalid")
+
+            todoText.onkeypress = {
+                if (todoText.value.isNotBlank()) {
+                    titleError.hide()
+                    todoText.classList.remove("is-invalid")
+                    todoText.onkeypress = null
+                }
+            }
+            return null
+        }
+
+        return Todo(title, description, completed)
+    }
+
+    private fun HTMLElement.hide() {
+        classList.add("invisible")
+    }
+
+    private fun HTMLElement.show() {
+        classList.remove("invisible")
     }
 
 }
