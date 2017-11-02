@@ -1,7 +1,7 @@
 package co.zsmb.kagutodos.frontend.components.addtodo
 
 import co.zsmb.kagutodos.frontend.model.Todo
-import co.zsmb.kagutodos.frontend.services.network.TodoAPI
+import co.zsmb.kagutodos.frontend.store.repository.TodoRepositoryImpl
 import co.zsmb.kagutodos.frontend.util.hide
 import co.zsmb.kagutodos.frontend.util.show
 import co.zsmb.weblib.core.Component
@@ -25,7 +25,7 @@ object AddTodoComponent : Component(
 class AddTodoController : Controller() {
 
     val logger by inject<Logger>()
-    val todoAPI by inject<TodoAPI>()
+    val repo by inject<TodoRepositoryImpl>()
     val navigator by inject<Navigator>()
 
     val todoText by lookup<HTMLInputElement>("todoText")
@@ -42,7 +42,7 @@ class AddTodoController : Controller() {
             logger.d(this, "button clicked!")
 
             val newTodo = createTodo() ?: return@onClick
-            todoAPI.addTodo(newTodo) { todo ->
+            repo.addTodo(newTodo) { todo ->
                 logger.d(this, "todo back from server ${todo.text}")
                 navigator.goto("/view/${todo._id}")
                 clearInputs()

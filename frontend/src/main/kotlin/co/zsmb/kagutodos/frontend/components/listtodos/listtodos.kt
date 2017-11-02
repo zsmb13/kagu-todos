@@ -1,6 +1,6 @@
 package co.zsmb.kagutodos.frontend.components.listtodos
 
-import co.zsmb.kagutodos.frontend.services.network.TodoAPI
+import co.zsmb.kagutodos.frontend.store.repository.TodoRepositoryImpl
 import co.zsmb.kagutodos.frontend.util.removeChildren
 import co.zsmb.weblib.core.Component
 import co.zsmb.weblib.core.Controller
@@ -22,7 +22,7 @@ object ListTodosComponent : Component(
 class ListTodosController : Controller() {
 
     private val logger by inject<Logger>()
-    private val todoAPI by inject<TodoAPI>()
+    private val repo by inject<TodoRepositoryImpl>()
     private val templateLoader by inject<TemplateLoader>()
     private val navigator by inject<Navigator>()
 
@@ -45,7 +45,7 @@ class ListTodosController : Controller() {
     }
 
     private fun refreshTodos() {
-        todoAPI.getTodos { todos ->
+        repo.getTodos { todos ->
             todoList.removeChildren()
             todos.forEach { todo ->
                 templateLoader.get("components/listtodos/listitem.html") { listItem ->

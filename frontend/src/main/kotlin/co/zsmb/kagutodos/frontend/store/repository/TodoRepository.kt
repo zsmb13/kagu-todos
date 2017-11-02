@@ -1,8 +1,8 @@
-package co.zsmb.kagutodos.frontend.services.network
+package co.zsmb.kagutodos.frontend.store.repository
 
 import co.zsmb.kagutodos.frontend.model.Todo
 
-interface TodoAPI {
+interface TodoRepository {
 
     fun getTodos(callback: (Array<Todo>) -> Unit)
 

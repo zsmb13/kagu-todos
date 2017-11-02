@@ -1,7 +1,7 @@
 package co.zsmb.kagutodos.frontend.components.viewtodo
 
 import co.zsmb.kagutodos.frontend.model.Todo
-import co.zsmb.kagutodos.frontend.services.network.TodoAPI
+import co.zsmb.kagutodos.frontend.store.repository.TodoRepositoryImpl
 import co.zsmb.weblib.core.Component
 import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
@@ -25,7 +25,7 @@ class ViewTodoController : Controller() {
     val idButton by lookup<HTMLButtonElement>("idButton")
     val description by lookup<HTMLParagraphElement>("description")
 
-    val todoApi by inject<TodoAPI>()
+    val repo by inject<TodoRepositoryImpl>()
     val params by inject<PathParams>()
 
     val todoId by lazy {
@@ -48,7 +48,7 @@ class ViewTodoController : Controller() {
     override fun onAdded() {
         super.onAdded()
 
-        todoApi.getTodo(todoId) { todo ->
+        repo.getTodo(todoId) { todo ->
             this.todo = todo
             displayTodo()
         }
@@ -74,7 +74,7 @@ class ViewTodoController : Controller() {
     private fun toggleCompletion() {
         todo = todo.copy(completed = !todo.completed)
 
-        todoApi.updateTodo(todoId, todo) {
+        repo.updateTodo(todoId, todo) {
             displayTodo()
         }
     }

@@ -3,7 +3,7 @@ package co.zsmb.kagutodos.frontend
 import co.zsmb.kagutodos.frontend.components.addtodo.AddTodoComponent
 import co.zsmb.kagutodos.frontend.components.listtodos.ListTodosComponent
 import co.zsmb.kagutodos.frontend.components.viewtodo.ViewTodoComponent
-import co.zsmb.kagutodos.frontend.services.network.NetworkModule
+import co.zsmb.kagutodos.frontend.store.StorageModule
 import co.zsmb.weblib.core.init.application
 
 
@@ -13,7 +13,7 @@ fun main(args: Array<String>) = application {
     }
 
     modules {
-        +NetworkModule
+        +StorageModule
     }
 
     routing {
