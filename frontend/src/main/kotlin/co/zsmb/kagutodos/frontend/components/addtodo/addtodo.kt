@@ -2,6 +2,8 @@ package co.zsmb.kagutodos.frontend.components.addtodo
 
 import co.zsmb.kagutodos.frontend.model.Todo
 import co.zsmb.kagutodos.frontend.services.network.TodoAPI
+import co.zsmb.kagutodos.frontend.util.hide
+import co.zsmb.kagutodos.frontend.util.show
 import co.zsmb.weblib.core.Component
 import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
@@ -9,7 +11,10 @@ import co.zsmb.weblib.core.util.lookup
 import co.zsmb.weblib.core.util.onClick
 import co.zsmb.weblib.services.logging.Logger
 import co.zsmb.weblib.services.navigation.Navigator
-import org.w3c.dom.*
+import org.w3c.dom.HTMLButtonElement
+import org.w3c.dom.HTMLDivElement
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.HTMLTextAreaElement
 
 object AddTodoComponent : Component(
         selector = "add-todo",
@@ -40,6 +45,7 @@ class AddTodoController : Controller() {
             todoAPI.addTodo(newTodo) { todo ->
                 logger.d(this, "todo back from server ${todo.text}")
                 navigator.goto("/view/${todo._id}")
+                clearInputs()
             }
         }
     }
@@ -68,12 +74,10 @@ class AddTodoController : Controller() {
         return Todo(title, description, completed)
     }
 
-    private fun HTMLElement.hide() {
-        classList.add("invisible")
-    }
-
-    private fun HTMLElement.show() {
-        classList.remove("invisible")
+    private fun clearInputs() {
+        todoText.value = ""
+        todoDescription.value = ""
+        completedCheckbox.checked = false
     }
 
 }

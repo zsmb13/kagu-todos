@@ -9,6 +9,7 @@ import co.zsmb.weblib.core.util.lookup
 import co.zsmb.weblib.core.util.onClick
 import co.zsmb.weblib.services.pathparams.PathParams
 import org.w3c.dom.HTMLButtonElement
+import org.w3c.dom.HTMLParagraphElement
 import org.w3c.dom.HTMLSpanElement
 
 object ViewTodoComponent : Component(
@@ -22,6 +23,7 @@ class ViewTodoController : Controller() {
     val nameSpan by lookup<HTMLSpanElement>("nameSpan")
     val statusButton by lookup<HTMLButtonElement>("statusButton")
     val idButton by lookup<HTMLButtonElement>("idButton")
+    val description by lookup<HTMLParagraphElement>("description")
 
     val todoApi by inject<TodoAPI>()
     val params by inject<PathParams>()
@@ -54,6 +56,7 @@ class ViewTodoController : Controller() {
 
     private fun displayTodo() {
         nameSpan.innerText = todo.text
+        description.innerText = todo.description ?: "This item has no description."
 
         statusButton.classList.remove(
                 "btn-outline-secondary",
