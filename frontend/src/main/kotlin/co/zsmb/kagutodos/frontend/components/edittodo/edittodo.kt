@@ -1,4 +1,4 @@
-package co.zsmb.kagutodos.frontend.components.addtodo
+package co.zsmb.kagutodos.frontend.components.edittodo
 
 import co.zsmb.kagutodos.frontend.model.Todo
 import co.zsmb.kagutodos.frontend.store.repository.TodoRepositoryImpl
@@ -10,46 +10,63 @@ import co.zsmb.weblib.core.di.inject
 import co.zsmb.weblib.core.util.lookup
 import co.zsmb.weblib.core.util.onClick
 import co.zsmb.weblib.services.navigation.Navigator
+import co.zsmb.weblib.services.pathparams.PathParams
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLTextAreaElement
 
-object AddTodoComponent : Component(
-        selector = "add-todo",
-        templateUrl = "components/addtodo/addtodo.html",
-        controller = ::AddTodoController
+object EditTodoComponent : Component(
+        selector = "edit-todo",
+        templateUrl = "components/edittodo/edittodo.html",
+        controller = ::EditTodoController
 )
 
-class AddTodoController : Controller() {
+class EditTodoController : Controller() {
 
     val repo by inject<TodoRepositoryImpl>()
     val navigator by inject<Navigator>()
+    val params by inject<PathParams>()
 
     val todoText by lookup<HTMLInputElement>("todoText")
     val titleError by lookup<HTMLDivElement>("titleError")
     val todoDescription by lookup<HTMLTextAreaElement>("todoDescription")
     val completedCheckbox by lookup<HTMLInputElement>("completedCheckbox")
 
-    val addButton by lookup<HTMLButtonElement>("addButton")
+    val todoId by lazy {
+        params.getString("todoId")
+                ?: throw RuntimeException("Invalid todo id, should have thought about this")
+    }
+
+    val saveButton by lookup<HTMLButtonElement>("saveButton")
+
+    var todo: Todo? = null
 
     override fun onCreate() {
         super.onCreate()
 
-        addButton.onClick {
-            val newTodo = createTodo() ?: return@onClick
-            repo.addTodo(newTodo) { todo ->
-                navigator.goto("/view/${todo._id}")
+        saveButton.onClick {
+            val newTodo = getTodo() ?: return@onClick
+            repo.updateTodo(newTodo) { savedTodo ->
+                navigator.goto("/view/${savedTodo._id}")
             }
         }
     }
 
     override fun onAdded() {
         super.onAdded()
-        clearInputs()
+
+        repo.getTodo(todoId) { todo ->
+            this.todo = todo
+            todoText.value = todo.text
+            todoDescription.value = todo.description ?: ""
+            completedCheckbox.checked = todo.completed
+        }
     }
 
-    private fun createTodo(): Todo? {
+    private fun getTodo(): Todo? {
+        val current = todo ?: return null
+
         val title = todoText.value
         val description = todoDescription.value
         val completed = completedCheckbox.checked
@@ -68,13 +85,7 @@ class AddTodoController : Controller() {
             return null
         }
 
-        return Todo(title, description, completed)
-    }
-
-    private fun clearInputs() {
-        todoText.value = ""
-        todoDescription.value = ""
-        completedCheckbox.checked = false
+        return current.copy(text = title, description = description, completed = completed)
     }
 
 }
