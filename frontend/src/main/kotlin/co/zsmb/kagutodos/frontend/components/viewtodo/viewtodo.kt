@@ -1,7 +1,7 @@
 package co.zsmb.kagutodos.frontend.components.viewtodo
 
 import co.zsmb.kagutodos.frontend.model.Todo
-import co.zsmb.kagutodos.frontend.store.repository.TodoRepositoryImpl
+import co.zsmb.kagutodos.frontend.store.repository.TodoRepository
 import co.zsmb.weblib.core.Component
 import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
@@ -27,7 +27,7 @@ class ViewTodoController : Controller() {
     val editButton by lookup<HTMLButtonElement>("editButton")
     val removeButton by lookup<HTMLButtonElement>("removeButton")
 
-    val repo by inject<TodoRepositoryImpl>()
+    val repo by inject<TodoRepository>()
     val params by inject<PathParams>()
     val navigator by inject<Navigator>()
 

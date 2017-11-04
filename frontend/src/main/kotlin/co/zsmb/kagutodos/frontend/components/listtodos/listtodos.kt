@@ -1,6 +1,6 @@
 package co.zsmb.kagutodos.frontend.components.listtodos
 
-import co.zsmb.kagutodos.frontend.store.repository.TodoRepositoryImpl
+import co.zsmb.kagutodos.frontend.store.repository.TodoRepository
 import co.zsmb.kagutodos.frontend.util.removeChildren
 import co.zsmb.weblib.core.Component
 import co.zsmb.weblib.core.Controller
@@ -20,7 +20,7 @@ object ListTodosComponent : Component(
 
 class ListTodosController : Controller() {
 
-    private val repo by inject<TodoRepositoryImpl>()
+    private val repo by inject<TodoRepository>()
     private val templateLoader by inject<TemplateLoader>()
     private val navigator by inject<Navigator>()
 
@@ -44,9 +44,11 @@ class ListTodosController : Controller() {
     private fun refreshTodos() {
         repo.getTodos { todos ->
             todoList.removeChildren()
-            todos.forEach { todo ->
+            todos.sortedBy { it.text }.forEach { todo ->
                 templateLoader.get("components/listtodos/listitem.html") { listItem ->
                     listItem.textContent = todo.text
+                    val colorClass = if (todo.completed) "list-group-item-success" else "list-group-item-danger"
+                    listItem.classList.add(colorClass)
                     listItem.onClick {
                         it.preventDefault()
                         navigator.goto("/view/${todo._id}")

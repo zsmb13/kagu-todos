@@ -12,6 +12,11 @@ class TodoRepositoryImpl(
     private var networkErrored = true
     private var syncInProgress = false
 
+    init {
+        networkErrored = true
+        sync()
+    }
+
     fun sync() {
         if (!networkErrored) return
         if (syncInProgress) return
@@ -56,11 +61,6 @@ class TodoRepositoryImpl(
                 syncInProgress = false
             }
         }
-    }
-
-    init {
-        networkErrored = true
-        sync()
     }
 
     override fun getTodos(callback: (Array<Todo>) -> Unit) {
@@ -110,12 +110,12 @@ class TodoRepositoryImpl(
     override fun removeTodo(id: String, callback: (Todo) -> Unit) {
         localApi.removeTodo(id) { localTodo ->
             callback(localTodo!!)
-        }
-        networkApi.removeTodo(id) { remoteTodo ->
-            if (remoteTodo == null) {
-                networkErrored = true
-            } else {
-                sync()
+            networkApi.removeTodo(id) { remoteTodo ->
+                if (remoteTodo == null) {
+                    networkErrored = true
+                } else {
+                    sync()
+                }
             }
         }
     }

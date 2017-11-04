@@ -1,7 +1,7 @@
 package co.zsmb.kagutodos.frontend.components.addtodo
 
 import co.zsmb.kagutodos.frontend.model.Todo
-import co.zsmb.kagutodos.frontend.store.repository.TodoRepositoryImpl
+import co.zsmb.kagutodos.frontend.store.repository.TodoRepository
 import co.zsmb.kagutodos.frontend.util.hide
 import co.zsmb.kagutodos.frontend.util.show
 import co.zsmb.weblib.core.Component
@@ -23,7 +23,7 @@ object AddTodoComponent : Component(
 
 class AddTodoController : Controller() {
 
-    val repo by inject<TodoRepositoryImpl>()
+    val repo by inject<TodoRepository>()
     val navigator by inject<Navigator>()
 
     val todoText by lookup<HTMLInputElement>("todoText")
