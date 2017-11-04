@@ -9,12 +9,47 @@ class TodoRepositoryImpl(
         private val localApi: LocalTodoAPI,
         private val networkApi: NetworkTodoAPI) : TodoRepository {
 
-    var networkErrored = false
+    var networkErrored = true
+    var syncInProgress = false
 
     fun sync() {
         if (!networkErrored) return
+        if (syncInProgress) return
 
+        syncInProgress = true
+        networkErrored = false
 
+        networkApi.getTodos { remoteTodos ->
+            localApi.getTodos { localTodos ->
+                val remote = remoteTodos!!
+                val local = localTodos!!
+
+                val allTodos = (remote + local).groupBy { it._id }
+
+                val finalTodos = mutableListOf<Todo>()
+
+                allTodos.forEach { (id, todosWithId) ->
+                    finalTodos +=
+                            if (todosWithId.size == 1)
+                                todosWithId.first()
+                            else
+                                todosWithId.maxBy { it.lastModified ?: 0 }!!
+                }
+
+                val finalTodoArray = finalTodos.toTypedArray()
+
+                localApi.setTodos(finalTodoArray) {
+                    networkApi.setTodos(finalTodoArray) {
+                        syncInProgress = false
+                    }
+                }
+            }
+        }
+    }
+
+    init {
+        networkErrored = true
+        sync()
     }
 
     override fun getTodos(callback: (Array<Todo>) -> Unit) {
@@ -48,14 +83,17 @@ class TodoRepositoryImpl(
     override fun addTodo(todo: Todo, callback: (Todo) -> Unit) {
         val timestampedTodo = todo.copy(lastModified = Date.now())
         localApi.addTodo(timestampedTodo) { localTodo ->
+            println("local api todo: ${JSON.stringify(localTodo)}")
             callback(localTodo!!)
-        }
-        networkApi.addTodo(timestampedTodo) { remoteTodo ->
-            if (remoteTodo == null) {
-                networkErrored = true
-            } else {
-                sync()
-                callback(remoteTodo)
+
+            networkApi.addTodo(localTodo) { remoteTodo ->
+                println("local api todo: ${JSON.stringify(remoteTodo)}")
+                if (remoteTodo == null) {
+                    networkErrored = true
+                } else {
+                    sync()
+                    callback(remoteTodo)
+                }
             }
         }
     }
@@ -73,17 +111,21 @@ class TodoRepositoryImpl(
         }
     }
 
-    override fun updateTodo(id: String, todo: Todo, callback: (Todo) -> Unit) {
-        val todoWithId = todo.copy(_id = id)
-        localApi.updateTodo(id, todoWithId) { localTodo ->
-            callback(localTodo!!)
+    override fun updateTodo(todo: Todo, callback: (Todo) -> Unit) {
+        val timeStampedTodo = todo.copy(lastModified = Date.now())
+        if (timeStampedTodo._id == null) {
+            throw IllegalArgumentException("Todo ID can't be null")
         }
-        networkApi.updateTodo(id, todoWithId) { remoteTodo ->
-            if (remoteTodo == null) {
-                networkErrored = true
-            } else {
-                sync()
-                callback(remoteTodo)
+        localApi.updateTodo(timeStampedTodo._id, timeStampedTodo) { localTodo ->
+            callback(localTodo!!)
+
+            networkApi.updateTodo(timeStampedTodo._id, localTodo) { remoteTodo ->
+                if (remoteTodo == null) {
+                    networkErrored = true
+                } else {
+                    sync()
+                    callback(remoteTodo)
+                }
             }
         }
     }

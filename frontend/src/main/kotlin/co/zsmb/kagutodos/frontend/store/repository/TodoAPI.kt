@@ -4,14 +4,16 @@ import co.zsmb.kagutodos.frontend.model.Todo
 
 interface TodoAPI {
 
-    fun getTodos(callback: (Array<Todo>?) -> Unit)
+    fun setTodos(todos: Array<Todo>, callback: (success: Boolean) -> Unit)
 
-    fun getTodo(id: String, callback: (Todo?) -> Unit)
+    fun getTodos(callback: (todos: Array<Todo>?) -> Unit)
 
-    fun addTodo(todo: Todo, callback: (Todo?) -> Unit)
+    fun getTodo(id: String, callback: (todo: Todo?) -> Unit)
 
-    fun removeTodo(id: String, callback: (Todo?) -> Unit)
+    fun addTodo(todo: Todo, callback: (addedTodo: Todo?) -> Unit)
 
-    fun updateTodo(id: String, todo: Todo, callback: (Todo?) -> Unit)
+    fun removeTodo(id: String, callback: (removedTodo: Todo?) -> Unit)
+
+    fun updateTodo(id: String, todo: Todo, callback: (updatedTodo: Todo?) -> Unit)
 
 }

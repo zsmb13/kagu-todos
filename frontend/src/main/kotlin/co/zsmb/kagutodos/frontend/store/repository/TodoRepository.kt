@@ -12,6 +12,6 @@ interface TodoRepository {
 
     fun removeTodo(id: String, callback: (Todo) -> Unit)
 
-    fun updateTodo(id: String, todo: Todo, callback: (Todo) -> Unit)
+    fun updateTodo(todo: Todo, callback: (Todo) -> Unit)
 
 }

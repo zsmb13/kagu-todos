@@ -43,7 +43,7 @@ class AddTodoController : Controller() {
 
             val newTodo = createTodo() ?: return@onClick
             repo.addTodo(newTodo) { todo ->
-                logger.d(this, "todo back from server ${todo.text}")
+                logger.d(this, "todo back from repo after insert: ${JSON.stringify(todo)}")
                 navigator.goto("/view/${todo._id}")
                 clearInputs()
             }

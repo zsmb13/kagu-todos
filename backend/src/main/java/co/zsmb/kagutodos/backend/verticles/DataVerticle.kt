@@ -6,6 +6,7 @@ import com.google.gson.JsonSyntaxException
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.mongo.BulkOperation
 import io.vertx.ext.mongo.MongoClient
 
 class DataVerticle : AbstractVerticle() {
@@ -14,6 +15,7 @@ class DataVerticle : AbstractVerticle() {
         const val GET_ALL_TODOS = "dataverticle.todos.get"
         const val ADD_NEW_TODO = "dataverticle.todos.add"
         const val GET_TODO_BY_ID = "dataverticle.todo.get"
+        const val SET_TODOS = "dataverticle.todo.set"
         const val UPDATE_TODO_BY_ID = "dataverticle.todo.update"
         const val REMOVE_TODO_BY_ID = "dataverticle.todo.delete"
 
@@ -43,6 +45,28 @@ class DataVerticle : AbstractVerticle() {
             }
         }
 
+        subscribe(SET_TODOS) { msg ->
+            mongoClient.dropCollection(DB_NAME) { dropResult ->
+                if (!dropResult.succeeded()) {
+                    msg.fail(500, "Couldn't drop collection")
+                } else {
+                    val todos = msg.parseJson<Array<Todo>>()
+                    val insertOps = todos.map { todo ->
+                        BulkOperation.createInsert(JsonObject(todo.toJson())).apply {
+                            isUpsert = true
+                        }
+                    }
+                    mongoClient.bulkWrite(DB_NAME, insertOps) { insertRes ->
+                        if (!insertRes.succeeded()) {
+                            msg.fail("Couldn't set todos: ${insertRes.cause().message}", 500)
+                        } else {
+                            msg.reply(jsonStr { "success" to true })
+                        }
+                    }
+                }
+            }
+        }
+
         subscribe(ADD_NEW_TODO) { msg ->
             val todo = try {
                 msg.parseJson<Todo>()
@@ -53,8 +77,7 @@ class DataVerticle : AbstractVerticle() {
 
             mongoClient.insert(DB_NAME, JsonObject(todo.toJson())) { res ->
                 if (res.succeeded()) {
-                    val insertedId = res.result()
-                    msg.reply(todo.copy(_id = insertedId).toJson())
+                    msg.reply(todo)
                 } else {
                     msg.fail("MongoDB error")
                     res.cause().printStackTrace()

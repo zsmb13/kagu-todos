@@ -8,6 +8,7 @@ import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.ADD_NEW_TODO
 import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.GET_ALL_TODOS
 import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.GET_TODO_BY_ID
 import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.REMOVE_TODO_BY_ID
+import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.SET_TODOS
 import co.zsmb.kagutodos.backend.verticles.DataVerticle.Companion.UPDATE_TODO_BY_ID
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
@@ -43,7 +44,8 @@ class WebVerticle : AbstractVerticle() {
                 }
             }
             post("/todos").handler { req ->
-                vertx.eventBus().send<String>(ADD_NEW_TODO, req.bodyAsString) { res ->
+                val task = if (req.bodyAsString.startsWith("[")) SET_TODOS else ADD_NEW_TODO
+                vertx.eventBus().send<String>(task, req.bodyAsString) { res ->
                     respondWithJson(res, req)
                 }
             }

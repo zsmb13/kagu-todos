@@ -21,29 +21,36 @@ class LocalTodoAPI(private val localStorage: LocalStorage) : TodoAPI {
         todos.addAll(todoArray)
     }
 
-    override fun getTodos(callback: (Array<Todo>?) -> Unit) {
+    override fun setTodos(todos: Array<Todo>, callback: (success: Boolean) -> Unit) {
+        this.todos.clear()
+        this.todos += todos
+        writeTodos()
+        callback(true)
+    }
+
+    override fun getTodos(callback: (todos: Array<Todo>?) -> Unit) {
         callback(todos.toTypedArray())
     }
 
-    override fun getTodo(id: String, callback: (Todo?) -> Unit) {
+    override fun getTodo(id: String, callback: (todo: Todo?) -> Unit) {
         callback(todos.find { it._id == id }!!)
     }
 
-    override fun addTodo(todo: Todo, callback: (Todo?) -> Unit) {
+    override fun addTodo(todo: Todo, callback: (addedTodo: Todo?) -> Unit) {
         val todoWithId = todo.copy(_id = IdGenerator.get())
         todos += todoWithId
         writeTodos()
         callback(todoWithId)
     }
 
-    override fun removeTodo(id: String, callback: (Todo?) -> Unit) {
+    override fun removeTodo(id: String, callback: (removedTodo: Todo?) -> Unit) {
         val todoToRemove = todos.find { it._id == id }!!
         todos -= todoToRemove
         writeTodos()
         callback(todoToRemove)
     }
 
-    override fun updateTodo(id: String, todo: Todo, callback: (Todo?) -> Unit) {
+    override fun updateTodo(id: String, todo: Todo, callback: (updatedTodo: Todo?) -> Unit) {
         val todoToRemove = todos.find { it._id == id }!!
         todos -= todoToRemove
         todos += todo

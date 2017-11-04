@@ -23,7 +23,13 @@ class NetworkTodoAPI(private val httpService: HttpService) : TodoAPI {
         callback(null)
     }
 
-    override fun getTodos(callback: (Array<Todo>?) -> Unit) {
+    override fun setTodos(todos: Array<Todo>, callback: (success: Boolean) -> Unit) {
+        httpService.post("${BASE_URL}/todos", todos,
+                onSuccess = { callback(true) },
+                onError = { callback(false) })
+    }
+
+    override fun getTodos(callback: (todos: Array<Todo>?) -> Unit) {
         httpService.get("${BASE_URL}/todos",
                 onSuccess = { result ->
                     val todos = JSON.parse<Array<Todo>>(result)
@@ -33,7 +39,7 @@ class NetworkTodoAPI(private val httpService: HttpService) : TodoAPI {
                 onError = sendError(callback))
     }
 
-    override fun getTodo(id: String, callback: (Todo?) -> Unit) {
+    override fun getTodo(id: String, callback: (todo: Todo?) -> Unit) {
         httpService.get("${BASE_URL}/todos/$id",
                 onSuccess = { result ->
                     logger.d(this, result)
@@ -42,7 +48,8 @@ class NetworkTodoAPI(private val httpService: HttpService) : TodoAPI {
                 onError = sendError(callback))
     }
 
-    override fun addTodo(todo: Todo, callback: (Todo?) -> Unit) {
+    override fun addTodo(todo: Todo, callback: (addedTodo: Todo?) -> Unit) {
+        logger.d(this, "Posting ${JSON.stringify(todo)}")
         httpService.post("${BASE_URL}/todos", todo,
                 onSuccess = { result ->
                     logger.d(this, result)
@@ -51,7 +58,7 @@ class NetworkTodoAPI(private val httpService: HttpService) : TodoAPI {
                 onError = sendError(callback))
     }
 
-    override fun removeTodo(id: String, callback: (Todo?) -> Unit) {
+    override fun removeTodo(id: String, callback: (removedTodo: Todo?) -> Unit) {
         httpService.delete("${BASE_URL}/todos/$id",
                 onSuccess = { result ->
                     logger.d(this, result)
@@ -60,7 +67,7 @@ class NetworkTodoAPI(private val httpService: HttpService) : TodoAPI {
                 onError = sendError(callback))
     }
 
-    override fun updateTodo(id: String, todo: Todo, callback: (Todo?) -> Unit) {
+    override fun updateTodo(id: String, todo: Todo, callback: (updatedTodo: Todo?) -> Unit) {
         httpService.put("${BASE_URL}/todos/$id", todo,
                 onSuccess = { result ->
                     logger.d(this, result)

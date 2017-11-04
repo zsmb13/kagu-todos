@@ -74,7 +74,7 @@ class ViewTodoController : Controller() {
     private fun toggleCompletion() {
         todo = todo.copy(completed = !todo.completed)
 
-        repo.updateTodo(todoId, todo) {
+        repo.updateTodo(todo) {
             displayTodo()
         }
     }
