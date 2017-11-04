@@ -5,8 +5,8 @@ import co.zsmb.kagutodos.frontend.util.removeChildren
 import co.zsmb.weblib.core.Component
 import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
-import co.zsmb.weblib.core.util.lookup
-import co.zsmb.weblib.core.util.onClick
+import co.zsmb.weblib.core.dom.onClick
+import co.zsmb.weblib.core.lookup
 import co.zsmb.weblib.services.navigation.Navigator
 import co.zsmb.weblib.services.templates.TemplateLoader
 import org.w3c.dom.HTMLButtonElement
