@@ -9,8 +9,8 @@ class TodoRepositoryImpl(
         private val localApi: LocalTodoAPI,
         private val networkApi: NetworkTodoAPI) : TodoRepository {
 
-    var networkErrored = true
-    var syncInProgress = false
+    private var networkErrored = true
+    private var syncInProgress = false
 
     fun sync() {
         if (!networkErrored) return
@@ -20,29 +20,40 @@ class TodoRepositoryImpl(
         networkErrored = false
 
         networkApi.getTodos { remoteTodos ->
+            if (remoteTodos == null) {
+                syncInProgress = false
+                return@getTodos
+            }
+
             localApi.getTodos { localTodos ->
-                val remote = remoteTodos!!
-                val local = localTodos!!
-
-                val allTodos = (remote + local).groupBy { it._id }
-
-                val finalTodos = mutableListOf<Todo>()
-
-                allTodos.forEach { (id, todosWithId) ->
-                    finalTodos +=
-                            if (todosWithId.size == 1)
-                                todosWithId.first()
-                            else
-                                todosWithId.maxBy { it.lastModified ?: 0 }!!
+                localApi.getDeletedTodos { deletedTodos ->
+                    mergeTodos(remoteTodos, localTodos!!, deletedTodos)
                 }
+            }
+        }
+    }
 
-                val finalTodoArray = finalTodos.toTypedArray()
+    private fun mergeTodos(remote: Array<Todo>, local: Array<Todo>, deletedTodos: Array<Todo>) {
+        val allTodos = (remote + local).groupBy { it._id }
 
-                localApi.setTodos(finalTodoArray) {
-                    networkApi.setTodos(finalTodoArray) {
-                        syncInProgress = false
-                    }
-                }
+        val finalTodos = mutableListOf<Todo>()
+
+        allTodos.forEach { (id, todosWithId) ->
+            val deleted = deletedTodos.filter { it._id == id }.maxBy { it.lastModified ?: 0 }
+            val latest = todosWithId.maxBy { it.lastModified ?: 0 }!!
+
+            if (deleted != null && deleted.lastModified!! > latest.lastModified!!) {
+                return@forEach
+            }
+
+            finalTodos += latest
+        }
+
+        val finalTodoArray = finalTodos.toTypedArray()
+
+        localApi.setTodos(finalTodoArray) {
+            networkApi.setTodos(finalTodoArray) {
+                syncInProgress = false
             }
         }
     }

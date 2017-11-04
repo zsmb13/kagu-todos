@@ -7,6 +7,7 @@ import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
 import co.zsmb.weblib.core.util.lookup
 import co.zsmb.weblib.core.util.onClick
+import co.zsmb.weblib.services.navigation.Navigator
 import co.zsmb.weblib.services.pathparams.PathParams
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLParagraphElement
@@ -24,25 +25,28 @@ class ViewTodoController : Controller() {
     val statusButton by lookup<HTMLButtonElement>("statusButton")
     val idButton by lookup<HTMLButtonElement>("idButton")
     val description by lookup<HTMLParagraphElement>("description")
+    val editButton by lookup<HTMLButtonElement>("editButton")
+    val removeButton by lookup<HTMLButtonElement>("removeButton")
 
     val repo by inject<TodoRepositoryImpl>()
     val params by inject<PathParams>()
+    val navigator by inject<Navigator>()
 
     val todoId by lazy {
         params.getString("todoId")
                 ?: throw RuntimeException("Invalid todo id, should have thought about this")
     }
 
-    lateinit var todo: Todo
+    var todo: Todo? = null
 
     override fun onCreate() {
         super.onCreate()
 
         idButton.innerText = todoId
 
-        statusButton.onClick {
-            toggleCompletion()
-        }
+        statusButton.onClick { toggleCompletion() }
+        editButton.onClick { editTodo() }
+        removeButton.onClick { removeTodo() }
     }
 
     override fun onAdded() {
@@ -55,14 +59,16 @@ class ViewTodoController : Controller() {
     }
 
     private fun displayTodo() {
-        nameSpan.innerText = todo.text
-        description.innerText = todo.description ?: "This item has no description."
+        val curretTodo = todo ?: return
+
+        nameSpan.innerText = curretTodo.text
+        description.innerText = curretTodo.description ?: "This item has no description."
 
         statusButton.classList.remove(
                 "btn-outline-secondary",
                 "btn-outline-success",
                 "btn-outline-danger")
-        if (todo.completed) {
+        if (curretTodo.completed) {
             statusButton.classList.add("btn-outline-success")
             statusButton.textContent = "Completed"
         } else {
@@ -72,10 +78,27 @@ class ViewTodoController : Controller() {
     }
 
     private fun toggleCompletion() {
-        todo = todo.copy(completed = !todo.completed)
+        todo?.let { currentTodo ->
+            val modifiedTodo = currentTodo.copy(completed = !currentTodo.completed)
 
-        repo.updateTodo(todo) {
-            displayTodo()
+            repo.updateTodo(modifiedTodo) {
+                todo = modifiedTodo
+                displayTodo()
+            }
+        }
+    }
+
+    private fun editTodo() {
+        todo?.let {
+            navigator.goto("/edit/${it._id}")
+        }
+    }
+
+    private fun removeTodo() {
+        todo?._id?.let {
+            repo.removeTodo(it) {
+                navigator.goto("/")
+            }
         }
     }
 

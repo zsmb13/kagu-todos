@@ -10,15 +10,28 @@ class LocalTodoAPI(private val localStorage: LocalStorage) : TodoAPI {
 
     companion object {
         private const val KEY_TODOS = "KEY_TODOS"
+        private const val KEY_DELETED_TODOS = "KEY_DELETED_TODOS"
     }
 
     private val todos = mutableListOf<Todo>()
+    private val deletedTodos = mutableListOf<Todo>()
 
     init {
+        initTodosList()
+        initDeletedTodosList()
+    }
+
+    private fun initTodosList() {
         val todosString = localStorage[KEY_TODOS] ?: "[]"
         val parsedTodos = JSON.parse<Array<Todo>>(todosString)
         val todoArray = parsedTodos.fixMethods()
         todos.addAll(todoArray)
+    }
+
+    private fun initDeletedTodosList() {
+        val todosString = localStorage[KEY_DELETED_TODOS] ?: "[]"
+        val parsedTodos = JSON.parse<Array<Todo>>(todosString)
+        deletedTodos.addAll(parsedTodos)
     }
 
     override fun setTodos(todos: Array<Todo>, callback: (success: Boolean) -> Unit) {
@@ -47,6 +60,8 @@ class LocalTodoAPI(private val localStorage: LocalStorage) : TodoAPI {
         val todoToRemove = todos.find { it._id == id }!!
         todos -= todoToRemove
         writeTodos()
+        deletedTodos += todoToRemove
+        writeDeletedTodos()
         callback(todoToRemove)
     }
 
@@ -58,8 +73,16 @@ class LocalTodoAPI(private val localStorage: LocalStorage) : TodoAPI {
         callback(todo)
     }
 
+    fun getDeletedTodos(callback: (deletedTodos: Array<Todo>) -> Unit) {
+        callback(deletedTodos.toTypedArray())
+    }
+
     private fun writeTodos() {
         localStorage[KEY_TODOS] = JSON.stringify(todos.toTypedArray())
+    }
+
+    private fun writeDeletedTodos() {
+        localStorage[KEY_DELETED_TODOS] = JSON.stringify(deletedTodos.toTypedArray())
     }
 
     private object IdGenerator {
