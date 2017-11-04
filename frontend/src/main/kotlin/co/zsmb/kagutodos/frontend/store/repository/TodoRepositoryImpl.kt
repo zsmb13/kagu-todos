@@ -94,11 +94,9 @@ class TodoRepositoryImpl(
     override fun addTodo(todo: Todo, callback: (Todo) -> Unit) {
         val timestampedTodo = todo.copy(lastModified = Date.now())
         localApi.addTodo(timestampedTodo) { localTodo ->
-            println("local api todo: ${JSON.stringify(localTodo)}")
             callback(localTodo!!)
 
             networkApi.addTodo(localTodo) { remoteTodo ->
-                println("local api todo: ${JSON.stringify(remoteTodo)}")
                 if (remoteTodo == null) {
                     networkErrored = true
                 } else {

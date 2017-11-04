@@ -7,7 +7,6 @@ import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
 import co.zsmb.weblib.core.util.lookup
 import co.zsmb.weblib.core.util.onClick
-import co.zsmb.weblib.services.logging.Logger
 import co.zsmb.weblib.services.navigation.Navigator
 import co.zsmb.weblib.services.templates.TemplateLoader
 import org.w3c.dom.HTMLButtonElement
@@ -21,7 +20,6 @@ object ListTodosComponent : Component(
 
 class ListTodosController : Controller() {
 
-    private val logger by inject<Logger>()
     private val repo by inject<TodoRepositoryImpl>()
     private val templateLoader by inject<TemplateLoader>()
     private val navigator by inject<Navigator>()
@@ -40,7 +38,6 @@ class ListTodosController : Controller() {
 
     override fun onAdded() {
         super.onAdded()
-        logger.d(this, "onAdded, refreshing todos")
         refreshTodos()
     }
 

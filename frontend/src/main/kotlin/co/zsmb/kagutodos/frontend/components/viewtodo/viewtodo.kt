@@ -23,7 +23,6 @@ class ViewTodoController : Controller() {
 
     val nameSpan by lookup<HTMLSpanElement>("nameSpan")
     val statusButton by lookup<HTMLButtonElement>("statusButton")
-    val idButton by lookup<HTMLButtonElement>("idButton")
     val description by lookup<HTMLParagraphElement>("description")
     val editButton by lookup<HTMLButtonElement>("editButton")
     val removeButton by lookup<HTMLButtonElement>("removeButton")
@@ -41,8 +40,6 @@ class ViewTodoController : Controller() {
 
     override fun onCreate() {
         super.onCreate()
-
-        idButton.innerText = todoId
 
         statusButton.onClick { toggleCompletion() }
         editButton.onClick { editTodo() }
