@@ -77,7 +77,7 @@ class DataVerticle : AbstractVerticle() {
 
             mongoClient.insert(DB_NAME, JsonObject(todo.toJson())) { res ->
                 if (res.succeeded()) {
-                    msg.reply(todo)
+                    msg.reply(todo.toJson())
                 } else {
                     msg.fail("MongoDB error")
                     res.cause().printStackTrace()
