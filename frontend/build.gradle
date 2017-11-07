@@ -8,6 +8,7 @@ buildscript {
 }
 
 apply plugin: 'kotlin2js'
+apply plugin: 'kotlin-dce-js'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
@@ -17,5 +18,6 @@ dependencies {
 }
 
 ext.rootPackage = "co.zsmb.kagutodos.frontend"
+ext.dceEnabled = true
 
 apply from: "helper.gradle"
