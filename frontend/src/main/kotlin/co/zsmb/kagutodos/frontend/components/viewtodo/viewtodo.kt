@@ -7,6 +7,8 @@ import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
 import co.zsmb.weblib.core.dom.onClick
 import co.zsmb.weblib.core.lookup
+import co.zsmb.weblib.services.messaging.MessageBroker
+import co.zsmb.weblib.services.messaging.MessageCallback
 import co.zsmb.weblib.services.navigation.Navigator
 import co.zsmb.weblib.services.pathparams.PathParams
 import org.w3c.dom.HTMLButtonElement
@@ -30,6 +32,11 @@ class ViewTodoController : Controller() {
     val repo by inject<TodoRepository>()
     val params by inject<PathParams>()
     val navigator by inject<Navigator>()
+    val messageBroker by inject<MessageBroker>()
+
+    val changeListener: MessageCallback = {
+
+    }
 
     val todoId by lazy {
         params.getString("todoId")
@@ -50,9 +57,26 @@ class ViewTodoController : Controller() {
         super.onAdded()
 
         repo.getTodo(todoId) { todo ->
+            unsub(this.todo?._id)
             this.todo = todo
             displayTodo()
+            sub(todo._id)
         }
+    }
+
+    override fun onRemoved() {
+        unsub(this.todo?._id)
+        super.onRemoved()
+    }
+
+    private fun sub(_id: String?) {
+        _id ?: return
+        messageBroker.subscribe("TODO_CHANGED_$_id", changeListener)
+    }
+
+    private fun unsub(_id: String?) {
+        _id ?: return
+        messageBroker.unsubscribe("TODO_CHANGED_$_id", changeListener)
     }
 
     private fun displayTodo() {

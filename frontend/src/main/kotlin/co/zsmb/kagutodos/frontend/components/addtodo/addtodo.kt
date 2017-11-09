@@ -8,6 +8,7 @@ import co.zsmb.weblib.core.Component
 import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
 import co.zsmb.weblib.core.dom.onClick
+import co.zsmb.weblib.core.dom.onKeyPress
 import co.zsmb.weblib.core.lookup
 import co.zsmb.weblib.services.navigation.Navigator
 import org.w3c.dom.HTMLButtonElement
@@ -57,8 +58,7 @@ class AddTodoController : Controller() {
         if (title.isBlank()) {
             titleError.show()
             todoText.classList.add("is-invalid")
-
-            todoText.onkeypress = {
+            todoText.onKeyPress {
                 if (todoText.value.isNotBlank()) {
                     titleError.hide()
                     todoText.classList.remove("is-invalid")

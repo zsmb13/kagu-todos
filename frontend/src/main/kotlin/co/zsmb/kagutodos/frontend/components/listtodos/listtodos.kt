@@ -7,6 +7,8 @@ import co.zsmb.weblib.core.Controller
 import co.zsmb.weblib.core.di.inject
 import co.zsmb.weblib.core.dom.onClick
 import co.zsmb.weblib.core.lookup
+import co.zsmb.weblib.services.messaging.MessageBroker
+import co.zsmb.weblib.services.messaging.MessageCallback
 import co.zsmb.weblib.services.navigation.Navigator
 import co.zsmb.weblib.services.templates.TemplateLoader
 import org.w3c.dom.HTMLButtonElement
@@ -23,9 +25,14 @@ class ListTodosController : Controller() {
     private val repo by inject<TodoRepository>()
     private val templateLoader by inject<TemplateLoader>()
     private val navigator by inject<Navigator>()
+    private val messageBroker by inject<MessageBroker>()
 
     private val refreshBtn by lookup<HTMLButtonElement>("refreshBtn")
     private val todoList by lookup<HTMLElement>("todoList")
+
+    private val todosChangedCallback: MessageCallback = {
+        refreshTodos()
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -39,6 +46,12 @@ class ListTodosController : Controller() {
     override fun onAdded() {
         super.onAdded()
         refreshTodos()
+        messageBroker.subscribe("TODOS_CHANGED", todosChangedCallback)
+    }
+
+    override fun onRemoved() {
+        messageBroker.unsubscribe("TODOS_CHANGED", todosChangedCallback)
+        super.onRemoved()
     }
 
     private fun refreshTodos() {
