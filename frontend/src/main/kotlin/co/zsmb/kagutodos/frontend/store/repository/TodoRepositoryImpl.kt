@@ -99,13 +99,18 @@ class TodoRepositoryImpl(
             val localId = localTodo._id
             val remoteTodo = remoteSet.find { it._id == localId }
 
-            val latestTodo = when {
-                remoteTodo == null || localTodo.lastModified!! > remoteTodo.lastModified!! ->
-                    localTodo
-                else -> {
-                    remoteSet -= remoteTodo
-                    remoteTodo
-                }
+            val latestTodo: Todo
+
+            if (remoteTodo == null) {
+                latestTodo = localTodo
+            } else {
+                remoteSet -= remoteTodo
+
+                // Necessary because these are broken Long values in the compiled JS
+                val localModified = localTodo.lastModified.toString().toLong()
+                val remoteModified = remoteTodo.lastModified.toString().toLong()
+
+                latestTodo = if (localModified > remoteModified) localTodo else remoteTodo
             }
 
             val deletedTodo = deletedTodos.filter { it._id == localId }.maxBy { it.lastModified ?: 0 }
