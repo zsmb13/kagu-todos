@@ -1,9 +1,9 @@
 package co.zsmb.kagutodos.frontend.store.network
 
+import co.zsmb.kagu.services.http.HttpService
 import co.zsmb.kagutodos.frontend.model.Todo
 import co.zsmb.kagutodos.frontend.model.fixMethods
 import co.zsmb.kagutodos.frontend.store.repository.TodoAPI
-import co.zsmb.weblib.services.http.HttpService
 
 class NetworkTodoAPI(private val httpService: HttpService) : TodoAPI {
 

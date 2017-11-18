@@ -1,9 +1,9 @@
 package co.zsmb.kagutodos.frontend.store.local
 
+import co.zsmb.kagu.services.storage.LocalStorage
 import co.zsmb.kagutodos.frontend.model.Todo
 import co.zsmb.kagutodos.frontend.model.fixMethods
 import co.zsmb.kagutodos.frontend.store.repository.TodoAPI
-import co.zsmb.weblib.services.storage.LocalStorage
 import kotlin.js.Math
 
 class LocalTodoAPI(private val localStorage: LocalStorage) : TodoAPI {

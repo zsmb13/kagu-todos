@@ -1,16 +1,16 @@
 package co.zsmb.kagutodos.frontend.components.viewtodo
 
+import co.zsmb.kagu.core.Component
+import co.zsmb.kagu.core.Controller
+import co.zsmb.kagu.core.di.inject
+import co.zsmb.kagu.core.dom.onClick
+import co.zsmb.kagu.core.lookup
+import co.zsmb.kagu.services.messaging.MessageBroker
+import co.zsmb.kagu.services.messaging.MessageCallback
+import co.zsmb.kagu.services.navigation.Navigator
+import co.zsmb.kagu.services.pathparams.PathParams
 import co.zsmb.kagutodos.frontend.model.Todo
 import co.zsmb.kagutodos.frontend.store.repository.TodoRepository
-import co.zsmb.weblib.core.Component
-import co.zsmb.weblib.core.Controller
-import co.zsmb.weblib.core.di.inject
-import co.zsmb.weblib.core.dom.onClick
-import co.zsmb.weblib.core.lookup
-import co.zsmb.weblib.services.messaging.MessageBroker
-import co.zsmb.weblib.services.messaging.MessageCallback
-import co.zsmb.weblib.services.navigation.Navigator
-import co.zsmb.weblib.services.pathparams.PathParams
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLParagraphElement
 import org.w3c.dom.HTMLSpanElement

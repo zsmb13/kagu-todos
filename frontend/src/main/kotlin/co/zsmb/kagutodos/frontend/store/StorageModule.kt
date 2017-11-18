@@ -1,13 +1,13 @@
 package co.zsmb.kagutodos.frontend.store
 
+import co.zsmb.kagu.services.http.HttpService
+import co.zsmb.kagu.services.messaging.MessageBroker
+import co.zsmb.kagu.services.storage.LocalStorage
 import co.zsmb.kagutodos.frontend.store.local.LocalTodoAPI
 import co.zsmb.kagutodos.frontend.store.network.NetworkTodoAPI
 import co.zsmb.kagutodos.frontend.store.repository.TodoRepository
 import co.zsmb.kagutodos.frontend.store.repository.TodoRepositoryImpl
 import co.zsmb.koinjs.dsl.module.Module
-import co.zsmb.weblib.services.http.HttpService
-import co.zsmb.weblib.services.messaging.MessageBroker
-import co.zsmb.weblib.services.storage.LocalStorage
 
 object StorageModule : Module() {
 

@@ -1,11 +1,11 @@
 package co.zsmb.kagutodos.frontend
 
+import co.zsmb.kagu.core.init.application
 import co.zsmb.kagutodos.frontend.components.addtodo.AddTodoComponent
 import co.zsmb.kagutodos.frontend.components.edittodo.EditTodoComponent
 import co.zsmb.kagutodos.frontend.components.listtodos.ListTodosComponent
 import co.zsmb.kagutodos.frontend.components.viewtodo.ViewTodoComponent
 import co.zsmb.kagutodos.frontend.store.StorageModule
-import co.zsmb.weblib.core.init.application
 
 
 fun main(args: Array<String>) = application {
