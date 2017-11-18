@@ -5,7 +5,7 @@ before_install:
   - chmod +x gradlew
 
 script:
-- ./gradlew clean frontend:build backend:shadowJar
+  - ./gradlew clean frontend:build backend:shadowJar
 
 notifications:
   email:
