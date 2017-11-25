@@ -35,7 +35,7 @@ class ViewTodoController : Controller() {
     val messageBroker by inject<MessageBroker>()
 
     val changeListener: MessageCallback = {
-
+        loadTodo()
     }
 
     val todoId by lazy {
@@ -56,12 +56,7 @@ class ViewTodoController : Controller() {
     override fun onAdded() {
         super.onAdded()
 
-        repo.getTodo(todoId) { todo ->
-            unsub(this.todo?._id)
-            this.todo = todo
-            displayTodo()
-            sub(todo._id)
-        }
+        loadTodo()
     }
 
     override fun onRemoved() {
@@ -79,17 +74,26 @@ class ViewTodoController : Controller() {
         messageBroker.unsubscribe("TODO_CHANGED_$_id", changeListener)
     }
 
-    private fun displayTodo() {
-        val curretTodo = todo ?: return
+    private fun loadTodo() {
+        repo.getTodo(todoId) { todo ->
+            unsub(this.todo?._id)
+            this.todo = todo
+            displayTodo()
+            sub(todo._id)
+        }
+    }
 
-        nameSpan.innerText = curretTodo.text
-        description.innerText = curretTodo.description ?: "This item has no description."
+    private fun displayTodo() {
+        val currentTodo = todo ?: return
+
+        nameSpan.innerText = currentTodo.text
+        description.innerText = currentTodo.description ?: "This item has no description."
 
         statusButton.classList.remove(
                 "btn-outline-secondary",
                 "btn-outline-success",
                 "btn-outline-danger")
-        if (curretTodo.completed) {
+        if (currentTodo.completed) {
             statusButton.classList.add("btn-outline-success")
             statusButton.textContent = "Completed"
         } else {
