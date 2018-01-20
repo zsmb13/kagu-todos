@@ -14,7 +14,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
 
     compile "co.zsmb:koinjs:0.1.3"
-    compile "co.zsmb:kagu:0.0.1"
+    compile "co.zsmb:kagu:0.2.1"
 }
 
 ext.rootPackage = "co.zsmb.kagutodos.frontend"
